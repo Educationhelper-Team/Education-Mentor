@@ -10,11 +10,13 @@ import logging
 # Instead of hardcoding the API key
 # api_key = "YOUR_SECRET_KEY"
 
-# Use environment variable
+# Before
+api_key = "YOUR_GROQ_API_KEY"
+
+# After
 import os
 api_key = os.getenv("GROQ_API_KEY")
-# Ensure the Groq client is installed in your environment
-# You can install it via pip if you haven't done so:    # pip install groq
+
 # If you are using a different client, make sure to import it correctly.    
 
 
