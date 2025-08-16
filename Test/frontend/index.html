@@ -19,36 +19,6 @@
             background-color: #4b5563;
             border-radius: 4px;
         }
-
-        /* Responsive layout classes for side-by-side view */
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-        }
-
-        @media (min-width: 768px) {
-            .main-content {
-                flex-direction: row;
-                justify-content: space-between;
-                width: 100%;
-            }
-            .chat-container-full {
-                width: 100%;
-            }
-            .chat-container-split {
-                width: calc(50% - 1rem);
-            }
-            .tool-container {
-                display: none;
-                width: calc(50% - 1rem);
-            }
-            .tool-container-active {
-                display: flex;
-                flex-direction: column;
-                position: relative;
-            }
-        }
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex">
@@ -129,9 +99,9 @@
     </aside>
 
     <!-- Main Content Area -->
-    <main class="flex-1 p-4 md:p-8 flex main-content">
+    <main class="flex-1 p-4 md:p-8 flex flex-col">
         <!-- AI Chatbot Container (Always visible) -->
-        <div id="chat-container" class="flex flex-col flex-1 relative chat-container-full">
+        <div id="chat-container" class="flex flex-col flex-1 relative w-full">
             <!-- Chat content will be injected here by JavaScript -->
             <div id="content-area" class="flex-1 overflow-y-auto space-y-6">
                 <!-- Initial content will be the welcome message -->
@@ -170,29 +140,12 @@
                 </div>
             </div>
         </div>
-
-        <!-- Tool Container (hidden by default) -->
-        <div id="tool-container" class="hidden md:flex flex-col w-full md:w-1/2 md:ml-4 bg-gray-800 p-4 rounded-xl shadow-xl overflow-y-auto tool-container">
-            <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
-                <h2 id="tool-title" class="text-xl font-bold text-gray-200"></h2>
-                <button id="close-tool-btn" class="text-gray-400 hover:text-white transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            <div id="tool-content-area" class="flex-1 overflow-y-auto">
-                <!-- Tool content will be injected here -->
-            </div>
-        </div>
     </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const chatContainer = document.getElementById('chat-container');
             const contentArea = document.getElementById('content-area');
-            const toolContainer = document.getElementById('tool-container');
-            const toolContentArea = document.getElementById('tool-content-area');
-            const toolTitle = document.getElementById('tool-title');
-            const closeToolBtn = document.getElementById('close-tool-btn');
             const mainInput = document.getElementById('main-input');
             const sendBtn = document.getElementById('send-btn');
             const newChatBtn = document.getElementById('new-chat-btn');
@@ -202,7 +155,6 @@
             const navItems = document.querySelectorAll('.nav-item');
             
             let chatHistory = [];
-            let activeTool = 'chatbot';
 
             // Helper function to handle API calls with exponential backoff
             const callGeminiApi = async (payload, retries = 3, delay = 1000) => {
@@ -386,95 +338,6 @@ Format the output clearly and use headings.`;
                  addAiMessage("This feature for generating audio lectures is a placeholder. You can now use the text-based chat for this purpose.");
             };
 
-            // Function to render the tool content
-            const renderTool = (view) => {
-                let title = '';
-                let content = '';
-
-                switch(view) {
-                    case 'dashboard':
-                        title = 'Dashboard';
-                        content = `
-                            <div class="text-center p-12">
-                                <h2 class="text-4xl font-bold mb-4 text-blue-400">Welcome to your Learning Dashboard!</h2>
-                                <p class="text-gray-400 text-lg">Use the sidebar to explore features like AI Syllabus and Courses.</p>
-                            </div>
-                        `;
-                        break;
-                    case 'syllabus':
-                        title = 'AI Syllabus';
-                        content = `
-                            <div class="text-center p-12">
-                                <h2 class="text-4xl font-bold mb-4 text-blue-400">Create an AI Syllabus</h2>
-                                <p class="text-gray-400 text-lg">Use the chat on the left to create a syllabus. Just type a prompt like: <br> ` + "`Create a syllabus for: Python programming`" + `</p>
-                            </div>
-                        `;
-                        break;
-                    case 'video-lectures':
-                        title = 'Video Lectures';
-                        content = `
-                            <div class="text-center p-12">
-                                <h2 class="text-4xl font-bold mb-4 text-blue-400">Generate a Lecture</h2>
-                                <p class="text-gray-400 text-lg">Use the chat on the left to create a lecture transcript. Just type a prompt like: <br> ` + "`Generate a lecture on: The three states of matter`" + `</p>
-                            </div>
-                        `;
-                        break;
-                    case 'courses':
-                        title = 'Your Courses';
-                        content = `
-                            <div class="text-center p-12">
-                                <h2 class="text-4xl font-bold mb-4 text-blue-400">Your Courses</h2>
-                                <p class="text-gray-400 text-lg">Here you can find all the courses you are enrolled in.</p>
-                                <div class="mt-8 space-y-4">
-                                    <div class="bg-gray-900 p-6 rounded-xl shadow-md flex justify-between items-center">
-                                        <h3 class="text-xl font-semibold text-gray-200">Introduction to Web Development</h3>
-                                        <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">Continue</button>
-                                    </div>
-                                    <div class="bg-gray-900 p-6 rounded-xl shadow-md flex justify-between items-center">
-                                        <h3 class="text-xl font-semibold text-gray-200">Advanced Data Science</h3>
-                                        <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">Continue</button>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        break;
-                    case 'study-notes':
-                        title = 'Your Study Notes';
-                        content = `
-                            <div class="text-center p-12">
-                                <h2 class="text-4xl font-bold mb-4 text-blue-400">Your Study Notes</h2>
-                                <p class="text-gray-400 text-lg">This is where your study notes will be stored.</p>
-                            </div>
-                        `;
-                        break;
-                    case 'practice-tests':
-                        title = 'Practice Tests';
-                        content = `
-                            <div class="text-center p-12">
-                                <h2 class="text-4xl font-bold mb-4 text-blue-400">Practice Tests</h2>
-                                <p class="text-gray-400 text-lg">You can take practice tests and quizzes here.</p>
-                            </div>
-                        `;
-                        break;
-                    case 'achievements':
-                        title = 'Achievements';
-                        content = `
-                            <div class="text-center p-12">
-                                <h2 class="text-4xl font-bold mb-4 text-blue-400">Achievements</h2>
-                                <p class="text-gray-400 text-lg">Track your progress and earn badges for your hard work!</p>
-                            </div>
-                        `;
-                        break;
-                }
-                
-                toolTitle.textContent = title;
-                toolContentArea.innerHTML = content;
-                toolContainer.classList.remove('hidden');
-                toolContainer.classList.add('tool-container-active');
-                chatContainer.classList.remove('chat-container-full');
-                chatContainer.classList.add('chat-container-split');
-            };
-
             // Event listeners for navigation
             navItems.forEach(item => {
                 item.addEventListener('click', (e) => {
@@ -484,26 +347,14 @@ Format the output clearly and use headings.`;
                     // Reset active state for all nav items
                     navItems.forEach(nav => nav.classList.remove('bg-gray-700', 'text-white'));
                     
-                    if (view === 'chatbot' || view === 'search-chats' || view === 'library' || view === 'sora') {
-                        closeToolPanel();
-                        // Special handling for chat-related views
-                        item.classList.add('bg-gray-700', 'text-white');
-                    } else {
-                        // Open tool panel for other views
-                        renderTool(view);
-                        item.classList.add('bg-gray-700', 'text-white');
+                    item.classList.add('bg-gray-700', 'text-white');
+                    
+                    // Show a message box for all other navigation items
+                    if (view !== 'chatbot' && view !== 'search-chats' && view !== 'library' && view !== 'sora') {
+                         showMessageBox("This section is a work in progress. For now, please use the AI Chatbot to interact with the assistant!");
                     }
                 });
             });
-
-            const closeToolPanel = () => {
-                toolContainer.classList.remove('tool-container-active');
-                toolContainer.classList.add('hidden');
-                chatContainer.classList.remove('chat-container-split');
-                chatContainer.classList.add('chat-container-full');
-            };
-
-            closeToolBtn.addEventListener('click', closeToolPanel);
 
             // Event listeners for the new microphone and upload buttons
             micBtn.addEventListener('click', () => {
@@ -535,7 +386,7 @@ Format the output clearly and use headings.`;
             // Initial render of the chat UI
             contentArea.innerHTML = `
                 <div class="text-center p-12">
-                    <h2 class="text-4xl font-bold mb-4 text-blue-400">Welcome to your Learning Hub!</h2>
+                    <h2 class="text-4xl font-bold mb-4 text-blue-400">Welcome to your AI Learning Hub!</h2>
                     <p class="text-gray-400 text-lg">I'm here to help you with your studies. Ask me anything!</p>
                 </div>
             `;
