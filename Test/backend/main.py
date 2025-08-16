@@ -8,6 +8,15 @@ import os
 import json
 import logging
 from groq import Groq  # Import the Groq client
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+api_key = os.getenv("GEMINI_API_KEY")
+
+
+
+
 
 # Set up logging for better error tracking
 logging.basicConfig(level=logging.INFO)
