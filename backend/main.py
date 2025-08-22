@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from groq import Groq, APIConnectionError, AuthenticationError, RateLimitError, APIError
 import uvicorn
 
+
 # Load environment variables
 load_dotenv()
 
@@ -23,6 +24,7 @@ app = FastAPI(
 )
 
 # Mount static files
+# You need a 'static' directory with your HTML files for these to work.
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Set up Jinja2 templates
@@ -35,6 +37,8 @@ async def read_index(request: Request):
 @app.get("/login.html", response_class=HTMLResponse)
 async def read_login(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
+
+
 
 # CORS Middleware
 app.add_middleware(
@@ -387,23 +391,24 @@ class EduMentorChatbot:
 
 # Initialize the Assistant
 try:
-    groq_api_key = os.getenv("GROQ_API_KEY")
+    groq_api_key = "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"
     if not groq_api_key:
         raise ValueError("GROQ_API_KEY not found. Set it in a .env file.")
 
     client = Groq(api_key=groq_api_key)
+    # The call to client.models.list() validates the key.
     client.models.list()
-    print("Groq API key validated.")
+    print("✅ Groq API key validated.")
 
     assistant = EduMentorChatbot(client)
     print("📚 EduMentor - Your AI Learning Assistant is ready. 📚")
 
 except (ValueError, AuthenticationError, APIConnectionError, APIError) as e:
-    print(f"Fatal Error: {e}")
+    print(f"❌ Fatal Error: {e}")
     print("EduMentor cannot start. Check your Groq API key.")
     assistant = None
 except Exception as e:
-    print(f"Critical Error: {type(e).__name__} - {e}")
+    print(f"❌ Critical Error: {type(e).__name__} - {e}")
     print("EduMentor cannot start due to an unforeseen issue.")
     assistant = None
 
@@ -415,7 +420,7 @@ def root():
 @app.post("/chat")
 async def chat(payload: ChatPayload):
     if not assistant:
-        raise HTTPException(status_code=500, detail="Chatbot not initialized.")
+        raise HTTPException(status_code=500, detail="Chatbot not initialized. Please check server logs.")
     user_input = payload.message
     if not user_input.strip():
         return ChatResponse(reply="Please ask something.")
@@ -423,13 +428,13 @@ async def chat(payload: ChatPayload):
         response = assistant.process_message(user_input)
         return ChatResponse(reply=response)
     except Exception as e:
-        print(f"Error: {e}")
-        raise HTTPException(status_code=500, detail="Internal error.")
+        print(f"Error processing chat message: {e}")
+        raise HTTPException(status_code=500, detail="Internal error during chat processing.")
 
 @app.post("/syllabus")
 async def generate_syllabus_endpoint(payload: SyllabusPayload):
     if not assistant:
-        raise HTTPException(status_code=500, detail="Chatbot not initialized.")
+        raise HTTPException(status_code=500, detail="Chatbot not initialized. Please check server logs.")
     try:
         return {"syllabus": assistant.generate_syllabus(payload.subject, payload.level)}
     except Exception as e:
@@ -439,7 +444,7 @@ async def generate_syllabus_endpoint(payload: SyllabusPayload):
 @app.post("/video")
 async def generate_video(payload: VideoPayload):
     if not assistant:
-        raise HTTPException(status_code=500, detail="Chatbot not initialized.")
+        raise HTTPException(status_code=500, detail="Chatbot not initialized. Please check server logs.")
     try:
         return {"video_description": assistant.generate_video_description(payload.topic)}
     except Exception as e:
@@ -449,7 +454,7 @@ async def generate_video(payload: VideoPayload):
 @app.post("/notes")
 async def generate_notes(payload: NotesPayload):
     if not assistant:
-        raise HTTPException(status_code=500, detail="Chatbot not initialized.")
+        raise HTTPException(status_code=500, detail="Chatbot not initialized. Please check server logs.")
     try:
         return {"notes": assistant.generate_notes(payload.topic)}
     except Exception as e:
@@ -459,7 +464,7 @@ async def generate_notes(payload: NotesPayload):
 @app.post("/test")
 async def generate_test_endpoint(payload: TestPayload):
     if not assistant:
-        raise HTTPException(status_code=500, detail="Chatbot not initialized.")
+        raise HTTPException(status_code=500, detail="Chatbot not initialized. Please check server logs.")
     try:
         return {"test": assistant.generate_test(payload.subject, payload.student_id)}
     except Exception as e:
@@ -469,19 +474,19 @@ async def generate_test_endpoint(payload: TestPayload):
 @app.get("/achievements")
 def get_achievements():
     if not assistant:
-        raise HTTPException(status_code=500, detail="Chatbot not initialized.")
+        raise HTTPException(status_code=500, detail="Chatbot not initialized. Please check server logs.")
     return {"achievements": assistant.achievements, "xp": assistant.xp}
 
 @app.get("/challenges")
 def get_challenges():
     if not assistant:
-        raise HTTPException(status_code=500, detail="Chatbot not initialized.")
+        raise HTTPException(status_code=500, detail="Chatbot not initialized. Please check server logs.")
     return {"daily": random.choice(RESOURCES["daily_challenges"]), "weekly": random.choice(RESOURCES["weekly_challenges"])}
 
 @app.get("/progress/{student_id}")
 def get_progress(student_id: str):
     if not assistant:
-        raise HTTPException(status_code=500, detail="Chatbot not initialized.")
+        raise HTTPException(status_code=500, detail="Chatbot not initialized. Please check server logs.")
     return {"progress": assistant.student_progress.get(student_id, {})}
 
 # Server Startup
