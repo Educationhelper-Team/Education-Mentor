@@ -54,6 +54,7 @@ async def read_index(request: Request):
 
 
 
+
 @app.get("/login.html", response_class=HTMLResponse)
 async def read_login(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
