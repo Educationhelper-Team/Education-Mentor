@@ -13,6 +13,10 @@ from groq import Groq, APIConnectionError, AuthenticationError, RateLimitError, 
 import uvicorn
 from pydantic import BaseModel
 
+from fastapi import File, UploadFile
+
+
+
 
 # Load environment variables
 load_dotenv()
@@ -35,10 +39,25 @@ templates = Jinja2Templates(directory="static")
 async def read_index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+@app.post("/", response_class=HTMLResponse)
+async def post_index(request: Request, username: str = "Form(...), password: str = Form(...)"):
+    # Handle form data here
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request, "username": username, "message": "Form submitted successfully!"}
+    )
+
+
+@app.get("/", response_class=HTMLResponse)
+async def read_index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
 
 @app.get("/login.html", response_class=HTMLResponse)
 async def read_login(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
+
 
 
 @app.get("/favican.ico", response_class=HTMLResponse)
@@ -47,13 +66,37 @@ async def read_login(request: Request):
 
 
 
-
-
+@app.post("/favicon.ico", response_class=HTMLResponse)
+async def post_web(request: Request, query: str = "Form(...)"):
+    # Handle form data here
+    return templates.TemplateResponse(
+        "favicon.ico",
+        {"request": request, "query": query, "message": "Data received on favicon.ico"}
+    )
 
 
 @app.get("/subjects")
 async def get_subjects():
-    return {"subjects": ["Math", "Science", "History","languages"]}
+    return {"subjects": ["Math", "Science", "English", "History"]}
+
+@app.get("/online_resources")
+async def get_online_resources():
+    return {
+        "resources": [
+            {"name": "Khan Academy", "url": "https://www.khanacademy.org"},
+            {"name": "Coursera", "url": "https://www.coursera.org"},
+            {"name": "edX", "url": "https://www.edx.org"},
+            {"name": "NPTEL", "url": "https://nptel.ac.in"},
+        ]
+    }
+
+
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    return {"message": f"Received file: {file.filename}"}
+
+
+
 
 class SyllabusRequest(BaseModel):
     subject: str
