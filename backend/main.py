@@ -11,6 +11,8 @@ from pydantic import BaseModel, validator
 from dotenv import load_dotenv
 from groq import Groq, APIConnectionError, AuthenticationError, RateLimitError, APIError
 import uvicorn
+from pydantic import BaseModel
+
 
    
 
@@ -45,7 +47,20 @@ async def read_index(request: Request):
 async def read_login(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
+@app.get("/subjects")
+async def get_subjects():
+    return {"subjects": ["Math", "Science", "History","languages"]}
 
+class SyllabusRequest(BaseModel):
+    subject: str
+
+@app.post("/syllabus")
+async def get_syllabus(data: SyllabusRequest):
+    return {"syllabus": f"Syllabus for {data.subject}"}
+
+@app.post("/syllabus")
+async def debug_syllabus(request: dict):
+    return {"received": request}
 
 
 
