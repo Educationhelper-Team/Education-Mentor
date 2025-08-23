@@ -12,6 +12,10 @@ from dotenv import load_dotenv
 from groq import Groq, APIConnectionError, AuthenticationError, RateLimitError, APIError
 import uvicorn
 
+   
+
+
+
 
 # Load environment variables
 load_dotenv()
@@ -22,6 +26,9 @@ app = FastAPI(
     description="An AI-driven web app to automate study materials, generate courses, and teach students through AI-powered explanations, videos, and study notes.",
     version="1.0.0"
 )
+
+
+
 
 # Mount static files
 # You need a 'static' directory with your HTML files for these to work.
@@ -37,6 +44,8 @@ async def read_index(request: Request):
 @app.get("/login.html", response_class=HTMLResponse)
 async def read_login(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
+
+
 
 
 
