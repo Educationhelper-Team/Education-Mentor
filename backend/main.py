@@ -14,11 +14,6 @@ import uvicorn
 from pydantic import BaseModel
 
 
-   
-
-
-
-
 # Load environment variables
 load_dotenv()
 
@@ -28,9 +23,6 @@ app = FastAPI(
     description="An AI-driven web app to automate study materials, generate courses, and teach students through AI-powered explanations, videos, and study notes.",
     version="1.0.0"
 )
-
-
-
 
 # Mount static files
 # You need a 'static' directory with your HTML files for these to work.
@@ -43,9 +35,21 @@ templates = Jinja2Templates(directory="static")
 async def read_index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+
 @app.get("/login.html", response_class=HTMLResponse)
 async def read_login(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
+
+
+@app.get("/favican.ico", response_class=HTMLResponse)
+async def read_login(request: Request):
+    return templates.TemplateResponse("favicon.ico", {"request": request})
+
+
+
+
+
+
 
 @app.get("/subjects")
 async def get_subjects():
@@ -61,6 +65,14 @@ async def get_syllabus(data: SyllabusRequest):
 @app.post("/syllabus")
 async def debug_syllabus(request: dict):
     return {"received": request}
+
+
+@app.post("/syllabus")
+async def generate_syllabus(request: SyllabusRequest):
+    # Generate syllabus (using AI / Groq)
+    return {"syllabus": f"Syllabus for {request.subject}, Grade {request.grade}"}
+
+
 
 
 
